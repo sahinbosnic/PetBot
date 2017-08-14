@@ -8,7 +8,7 @@ namespace PetBot
     class GpioSwitch
     {
 
-        public void TurnPinOn(int pinid)
+        public void OpenPin(int pinid)
         {
             if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
@@ -21,7 +21,7 @@ namespace PetBot
             }
         }
 
-        public void TurnPinOff(int pinid)
+        public void ClosePin(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {

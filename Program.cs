@@ -6,7 +6,7 @@ namespace PetBot
     {
         static void Main(string[] args)
         {
-            //Test
+            //Simple code to work with gpio
             GpioSwitch gpio = new GpioSwitch();
             while (true)
             {
@@ -18,13 +18,13 @@ namespace PetBot
                     case 1:
                         Console.WriteLine("which pin would you like to open?");
                         int open = int.Parse(Console.ReadLine());
-                        gpio.TurnPinOn(open);
+                        gpio.OpenPin(open);
                         break;
 
                     case 2:
                         Console.WriteLine("which pin would you like to close?");
                         int close = int.Parse(Console.ReadLine());
-                        gpio.TurnPinOff(close);
+                        gpio.ClosePin(close);
                         break;
                 }
             }
