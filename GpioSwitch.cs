@@ -34,9 +34,32 @@ namespace PetBot
             }
         }
 
-        public void ChangePinValue(int pinid, int pinvalue)
+        public void ChangeValue(int pinid, int pinvalue)
         {
+            if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
+            {
+                //Do something
+            }
+            else
+            {
+                Console.WriteLine("error... pin " + pinid + " is  closed");
+            }
+        }
 
+        public void ChangeDirection(int pinid, int pindirection)
+        {
+            if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
+            {
+                //Do something
+            }
+            else
+            {
+                Console.WriteLine("error... pin " + pinid + " is  closed");
+            }
+        }
+
+        public void ScanOpenPins()
+        {
         }
     }
 }
