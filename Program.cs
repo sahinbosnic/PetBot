@@ -51,7 +51,8 @@ namespace PetBot
                 Console.WriteLine("Engine Config Menu");
                 Console.WriteLine("1. Update from config file");
                 Console.WriteLine("2. Edit config file");
-                Console.WriteLine("3. Back");
+                Console.WriteLine("3. View config file");
+                Console.WriteLine("4. Back");
                 int val = int.Parse(Console.ReadLine());
                 switch (val)
                 {
@@ -62,6 +63,11 @@ namespace PetBot
 
                     case 2:
                         //Edit config file
+                        engine.EditConfig();
+                        break;
+                    case 3:
+                        //View config file
+                        engine.ViewConfig();
                         break;
                     default:
                         menu = false;
