@@ -9,36 +9,46 @@ namespace PetBot
 
         static void Main(string[] args)
         {
-
-            while (true)
+            bool active = true;
+            while (active)
             {
-                Console.Clear();
-                Console.WriteLine("What would you like to do?");
-                Console.WriteLine("1. Drive PetBot");
-                Console.WriteLine("2. Activate AI");
-                Console.WriteLine("3. Engine Config");
-                Console.WriteLine("4. Handle GPIO pins");
-                int val = int.Parse(Console.ReadLine());
-                switch (val)
+                try
                 {
-                    case 1:
-                        break;
+                    Console.Clear();
+                    Console.WriteLine("What would you like to do?");
+                    Console.WriteLine("1. Drive PetBot");
+                    Console.WriteLine("2. Activate AI");
+                    Console.WriteLine("3. Engine Config");
+                    Console.WriteLine("4. Handle GPIO pins");
+                    int val = int.Parse(Console.ReadLine());
+                    switch (val)
+                    {
+                        case 1:
+                            engine.Controller();
+                            break;
 
-                    case 2:
-                        break;
+                        case 2:
+                            break;
 
-                    case 3:
-                        //Engine Config
-                        EngineMenu();
-                        break;
+                        case 3:
+                            //Engine Config
+                            EngineMenu();
+                            break;
 
-                    case 4:
-                        //Handle GPIO pins
-                        GpioMenu();
-                        break;
+                        case 4:
+                            //Handle GPIO pins
+                            GpioMenu();
+                            break;
 
-                    default:
-                        break;
+                        default:
+                            break;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    //Post info to database and light up RED led!
+                    //Severety "SERIOUS"
+                    Console.WriteLine(ex.ToString());
                 }
             }
         }
@@ -49,7 +59,7 @@ namespace PetBot
             while (menu)
             {
                 Console.WriteLine("Engine Config Menu");
-                Console.WriteLine("1. Update from config file");
+                Console.WriteLine("1. Reload config file");
                 Console.WriteLine("2. Edit config file");
                 Console.WriteLine("3. View config file");
                 Console.WriteLine("4. Back");
@@ -84,7 +94,8 @@ namespace PetBot
                 Console.WriteLine("GPIO Pin Menu");
                 Console.WriteLine("1. Open pin");
                 Console.WriteLine("2. Close pin");
-                Console.WriteLine("3. Back");
+                Console.WriteLine("3. Scan open pins");
+                Console.WriteLine("4. Back");
                 int val = int.Parse(Console.ReadLine());
                 switch (val)
                 {
@@ -98,6 +109,9 @@ namespace PetBot
                         Console.WriteLine("Which pin would you like to close?");
                         int close = int.Parse(Console.ReadLine());
                         gpio.ClosePin(close);
+                        break;
+                    case 3:
+                        gpio.ScanOpenPins();
                         break;
                     default:
                         menu = false;

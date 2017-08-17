@@ -60,6 +60,24 @@ namespace PetBot
 
         public void ScanOpenPins()
         {
+            Console.WriteLine("Scanning for open pins...");
+            for(int i = 1; i <= 40; i++)
+            {
+                if (Directory.Exists("/sys/class/gpio/gpio" + i))
+                {
+                    Console.Write("Gpio Pin " + i );
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine(" OPEN");
+                    Console.ResetColor();
+                }
+                else if (!Directory.Exists("/sys/class/gpio/gpio" + i))
+                {
+                    Console.Write("Gpio Pin " + i);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(" Closed");
+                    Console.ResetColor();
+                }
+            }
         }
     }
 }
