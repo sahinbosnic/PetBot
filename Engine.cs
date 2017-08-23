@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Threading;
 
 namespace PetBot
 {
     class Engine
     {
+        private GpioSwitch gpio = new GpioSwitch();
         private int EngineA1;
         private int EngineA2;
         private int EngineB1;
@@ -18,6 +20,7 @@ namespace PetBot
         public Engine()
         {
             ReadConfig(); //Initialize by getting data from config file
+            ActivateEngines(); //Activate engines
         }
 
         public void ReadConfig()
@@ -29,21 +32,25 @@ namespace PetBot
                 foreach (var line in lines)
                 {
                     string[] newLine = line.Split(":");
-                    if(newLine[0] == "Engine A 1" || newLine[1].Length > 0)
+                    if (newLine[0].Equals("Engine A 1") && newLine[1].Length > 0)
                     {
                         EngineA1 = int.Parse(newLine[1]);
+                        Console.WriteLine("EngineA1 set as: " + EngineA1);
                     }
-                    else if (newLine[0] == "Engine A 2" || newLine[1].Length > 0)
+                    else if (newLine[0].Equals("Engine A 2") && newLine[1].Length > 0)
                     {
                         EngineA2 = int.Parse(newLine[1]);
+                        Console.WriteLine("EngineA2 set as: " + EngineA2);
                     }
-                    else if (newLine[0] == "Engine B 1" || newLine[1].Length > 0)
+                    else if (newLine[0].Equals("Engine B 1") && newLine[1].Length > 0)
                     {
                         EngineB1 = int.Parse(newLine[1]);
+                        Console.WriteLine("EngineB1 set as: " + EngineB1);
                     }
-                    else if (newLine[0] == "Engine B 2" || newLine[1].Length > 0)
+                    else if (newLine[0].Equals("Engine B 2") && newLine[1].Length > 0)
                     {
                         EngineB2 = int.Parse(newLine[1]);
+                        Console.WriteLine("EngineB2 set as: " + EngineB2);
                     }
                     else
                     {
@@ -104,12 +111,27 @@ namespace PetBot
             }
         }
 
-
         public void ViewConfig()
         {
             Console.WriteLine(File.ReadAllText("Engine.config"));
         }
 
+        public void ActivateEngines()
+        {
+            //Open engine pins
+            gpio.Open(EngineA1);
+            gpio.Open(EngineA2);
+            gpio.Open(EngineB1);
+            gpio.Open(EngineB2);
+
+            //Set engine pin direction as 'out'
+            gpio.Out(EngineA1);
+            gpio.Out(EngineA2);
+            gpio.Out(EngineB1);
+            gpio.Out(EngineB2);
+
+            Console.WriteLine("Engines activated");
+        }
 
         public void Controller()
         {
@@ -126,7 +148,6 @@ namespace PetBot
                 int ms = (int)span.TotalMilliseconds;        
                 if (Console.KeyAvailable)
                 {
-                    engines = true;
                     cki = Console.ReadKey(true);
                     Console.WriteLine(cki.Key);
                     Console.WriteLine(ms + "ms");
@@ -137,6 +158,7 @@ namespace PetBot
                             {
                                 if (state.Key.ToString() != "W")
                                 {
+                                    engines = false;
                                     Stop(); //Stop engine from running other direction
                                 }
 
@@ -144,13 +166,19 @@ namespace PetBot
                                 {
                                     //Engine is still running this way
                                     time = DateTime.Now;
+                                    if(!engines)
+                                    {
+                                        engines = true;
+                                        MoveForward();
+                                    }
                                 }
                                 else
                                 {
                                     //Activate engines
-                                    Console.WriteLine("Moving FORWARD");
+                                    MoveForward();
                                     state = cki;
                                     time = DateTime.Now; //Reset timer
+                                    engines = true;
                                 }
                             }
                             break;
@@ -159,6 +187,7 @@ namespace PetBot
                             {
                                 if (state.Key.ToString() != "A")
                                 {
+                                    engines = false;
                                     Stop(); //Stop engine from running other direction
                                 }
 
@@ -166,6 +195,11 @@ namespace PetBot
                                 {
                                     //Engine is still running this way
                                     time = DateTime.Now;
+                                    if (!engines)
+                                    {
+                                        engines = true;
+                                        Console.WriteLine("Moving LEFT");
+                                    }
                                 }
                                 else
                                 {
@@ -173,6 +207,7 @@ namespace PetBot
                                     Console.WriteLine("Moving LEFT");
                                     state = cki;
                                     time = DateTime.Now; //Reset timer
+                                    engines = true;
                                 }
                             }
                             break;
@@ -181,6 +216,7 @@ namespace PetBot
                             {
                                 if (state.Key.ToString() != "S")
                                 {
+                                    engines = false;
                                     Stop(); //Stop engine from running other direction
                                 }
 
@@ -188,13 +224,19 @@ namespace PetBot
                                 {
                                     //Engine is still running this way
                                     time = DateTime.Now;
+                                    if (!engines)
+                                    {
+                                        engines = true;
+                                        MoveReverse();
+                                    }
                                 }
                                 else
                                 {
                                     //Activate engines
-                                    Console.WriteLine("Moving REVERSE");
+                                    MoveReverse();
                                     state = cki;
                                     time = DateTime.Now; //Reset timer
+                                    engines = true;
                                 }
                             }
                             break;
@@ -203,6 +245,7 @@ namespace PetBot
                             {
                                 if (state.Key.ToString() != "D")
                                 {
+                                    engines = false;
                                     Stop(); //Stop engine from running other direction
                                 }
 
@@ -210,6 +253,11 @@ namespace PetBot
                                 {
                                     //Engine is still running this way
                                     time = DateTime.Now;
+                                    if (!engines)
+                                    {
+                                        engines = true;
+                                        Console.WriteLine("Moving RIGHT");
+                                    }
                                 }
                                 else
                                 {
@@ -217,6 +265,7 @@ namespace PetBot
                                     Console.WriteLine("Moving RIGHT");
                                     state = cki;
                                     time = DateTime.Now; //Reset timer
+                                    engines = true;
                                 }
                             }
                             break;
@@ -236,19 +285,53 @@ namespace PetBot
         }
 
 
-        public void MoveForward(/*int lSpeed, int rSpeed*/)
+        public void MoveForward()
         {
+            //Stop engines to avoid damage, then start moving forward
+            Stop();
+            Console.WriteLine("Moving FORWARD, " + EngineA1 + " " + EngineB1);
+            gpio.High(EngineA1);
+            gpio.High(EngineB1);
 
         }
 
-        public void MoveReverse(/*int lSpeed, int rSpeed*/)
+        public void MoveReverse()
         {
+            //Stop engines to avoid damage, then start moving reverse
+            Stop();
+            Console.WriteLine("Moving REVERSE, " + EngineA2 + " " + EngineB2);
+            gpio.High(EngineA2);
+            gpio.High(EngineB2);
+        }
+
+        public void MoveLeft()
+        {
+            //Stop engines to avoid damage, then start moving left
+            Stop();
+            Console.WriteLine("Left LEFT, " + EngineA1 + " " + EngineB1);
+            gpio.High(EngineA2);
+            gpio.High(EngineB1);
+
+        }
+
+        public void MoveRight()
+        {
+            //Stop engines to avoid damage, then start moving right
+            Stop();
+            Console.WriteLine("Left RIGHT, " + EngineA1 + " " + EngineB1);
+            gpio.High(EngineA1);
+            gpio.High(EngineB2);
 
         }
 
         public void Stop()
         {
             Console.WriteLine("Stopping Engines");
+            gpio.Low(EngineA1);
+            gpio.Low(EngineA2);
+            gpio.Low(EngineB1);
+            gpio.Low(EngineB2);
+
         }
     }
 }
