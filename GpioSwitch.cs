@@ -7,55 +7,82 @@ namespace PetBot
 {
     class GpioSwitch
     {
-
-        public void OpenPin(int pinid)
+        public void Open(int pinid)
         {
             if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
                 Console.WriteLine("...about to open pin " + pinid);
                 File.WriteAllText("/sys/class/gpio/export", pinid.ToString());
             }
-            else
+            else if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
                 Console.WriteLine("...pin " + pinid + " is already open");
             }
         }
 
-        public void ClosePin(int pinid)
+        public void Close(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
                 Console.WriteLine("...about to close pin " + pinid);
                 File.WriteAllText("/sys/class/gpio/unexport", pinid.ToString());
             }
-            else
+            else if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
                 Console.WriteLine("...pin " + pinid + " is already closed");
             }
         }
 
-        public void ChangeValue(int pinid, int pinvalue)
+        public void High(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
-                //Do something
+                //Set value 1
+                File.WriteAllText("/sys/class/gpio/gpio" + pinid.ToString() + "/value", 1.ToString());
             }
-            else
+            else if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
-                Console.WriteLine("error... pin " + pinid + " is  closed");
+                Console.WriteLine("Error.. cant change value, " + pinid + " is closed");
+            }
+        }
+        public void Low(int pinid)
+        {
+            if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
+            {
+                //Set value 0
+                File.WriteAllText("/sys/class/gpio/gpio" + pinid.ToString() + "/value", 0.ToString());
+            }
+            else if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
+            {
+                Console.WriteLine("Error.. cant change value, " + pinid + " is closed");
             }
         }
 
-        public void ChangeDirection(int pinid, int pindirection)
+        public void In(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
-                //Do something
+                //Set direction 'in'
+                File.WriteAllText("/sys/class/gpio/gpio" + pinid.ToString() + "/direction", "in");
             }
-            else
+            else if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
-                Console.WriteLine("error... pin " + pinid + " is  closed");
+                Console.WriteLine("Error.. cant change direction, " + pinid + " is closed");
             }
+        }
+
+        public void Out(int pinid)
+        {
+            if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
+            {
+                //Set direction 'out'
+                File.WriteAllText("/sys/class/gpio/gpio" + pinid.ToString() + "/direction", "out");
+            }
+            else if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
+            {
+                Console.WriteLine("Error.. cant change direction, " + pinid + " is closed");
+            }
+ 
         }
 
         public void ScanOpenPins()
@@ -68,13 +95,6 @@ namespace PetBot
                     Console.Write("Gpio Pin " + i );
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine(" OPEN");
-                    Console.ResetColor();
-                }
-                else if (!Directory.Exists("/sys/class/gpio/gpio" + i))
-                {
-                    Console.Write("Gpio Pin " + i);
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(" Closed");
                     Console.ResetColor();
                 }
             }
