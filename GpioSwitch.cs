@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PetBot
 {
-    class GpioSwitch
+    class GpioCore
     {
         public void Open(int pinid)
         {
@@ -87,6 +87,7 @@ namespace PetBot
 
         public void ScanOpenPins()
         {
+            //Dont use yet, not functional
             Console.WriteLine("Scanning for open pins...");
             for(int i = 1; i <= 40; i++)
             {
