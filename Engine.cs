@@ -8,14 +8,11 @@ namespace PetBot
 {
     class Engine
     {
-        private GpioSwitch gpio = new GpioSwitch();
+        private GpioCore gpio = new GpioCore();
         private int EngineA1;
         private int EngineA2;
         private int EngineB1;
         private int EngineB2;
-
-        /*private int topSpeed;
-        private int currentSpeed;*/
 
         public Engine()
         {
@@ -145,150 +142,71 @@ namespace PetBot
             while (driving)
             {
                 TimeSpan span = DateTime.Now - time;
-                int ms = (int)span.TotalMilliseconds;        
+                int ms = (int)span.TotalMilliseconds; //Get ms since last command
+
                 if (Console.KeyAvailable)
                 {
+                    engines = true;
                     cki = Console.ReadKey(true);
-                    Console.WriteLine(cki.Key);
                     Console.WriteLine(ms + "ms");
-                    switch (cki.Key.ToString())
+
+                    Console.WriteLine("STATE: " + state.Key);
+                    Console.WriteLine("CKI: " + cki.Key);
+
+                    if (ms >= 300 || cki.Key.ToString() != state.Key.ToString())
                     {
-                        case "W":
-                            if (ms >= 300)
-                            {
-                                if (state.Key.ToString() != "W")
-                                {
-                                    engines = false;
-                                    Stop(); //Stop engine from running other direction
-                                }
-
-                                if (state.Key.ToString() == "W")
-                                {
-                                    //Engine is still running this way
-                                    time = DateTime.Now;
-                                    if(!engines)
-                                    {
-                                        engines = true;
-                                        MoveForward();
-                                    }
-                                }
-                                else
-                                {
-                                    //Activate engines
-                                    MoveForward();
-                                    state = cki;
-                                    time = DateTime.Now; //Reset timer
-                                    engines = true;
-                                }
-                            }
-                            break;
-                        case "A":
-                            if (ms >= 300)
-                            {
-                                if (state.Key.ToString() != "A")
-                                {
-                                    engines = false;
-                                    Stop(); //Stop engine from running other direction
-                                }
-
-                                if (state.Key.ToString() == "A")
-                                {
-                                    //Engine is still running this way
-                                    time = DateTime.Now;
-                                    if (!engines)
-                                    {
-                                        engines = true;
-                                        Console.WriteLine("Moving LEFT");
-                                    }
-                                }
-                                else
-                                {
-                                    //Activate engines
-                                    Console.WriteLine("Moving LEFT");
-                                    state = cki;
-                                    time = DateTime.Now; //Reset timer
-                                    engines = true;
-                                }
-                            }
-                            break;
-                        case "S":
-                            if (ms >= 300)
-                            {
-                                if (state.Key.ToString() != "S")
-                                {
-                                    engines = false;
-                                    Stop(); //Stop engine from running other direction
-                                }
-
-                                if (state.Key.ToString() == "S")
-                                {
-                                    //Engine is still running this way
-                                    time = DateTime.Now;
-                                    if (!engines)
-                                    {
-                                        engines = true;
-                                        MoveReverse();
-                                    }
-                                }
-                                else
-                                {
-                                    //Activate engines
-                                    MoveReverse();
-                                    state = cki;
-                                    time = DateTime.Now; //Reset timer
-                                    engines = true;
-                                }
-                            }
-                            break;
-                        case "D":
-                            if (ms >= 300)
-                            {
-                                if (state.Key.ToString() != "D")
-                                {
-                                    engines = false;
-                                    Stop(); //Stop engine from running other direction
-                                }
-
-                                if (state.Key.ToString() == "D")
-                                {
-                                    //Engine is still running this way
-                                    time = DateTime.Now;
-                                    if (!engines)
-                                    {
-                                        engines = true;
-                                        Console.WriteLine("Moving RIGHT");
-                                    }
-                                }
-                                else
-                                {
-                                    //Activate engines
-                                    Console.WriteLine("Moving RIGHT");
-                                    state = cki;
-                                    time = DateTime.Now; //Reset timer
-                                    engines = true;
-                                }
-                            }
-                            break;
-                        default:
-                            engines = false; // Turn of engines
-                            driving = false; // Quit driving mode
-                            break;
+                        Console.WriteLine(ms + " NEW MS");
+                        Stop(); // Stop engines before changing direction
+                        state = cki; //Set new state
+                        time = DateTime.Now; // Update timer
+                        Console.WriteLine("NEW direction: " + cki.Key.ToString());
+                        switch (cki.Key.ToString())
+                        {
+                            case "W":
+                                MoveForward();
+                                break;
+                            case "A":
+                                MoveLeft();
+                                break;
+                            case "S":
+                                MoveReverse();
+                                break;
+                            case "D":
+                                MoveRight();
+                                break;
+                            default:
+                                engines = false; // Turn of engines
+                                driving = false; // Quit driving mode
+                                break;
+                        }
+                        Console.WriteLine("");
                     }
+
+                    if(cki.Key.ToString() == state.Key.ToString())
+                    {
+                        Console.WriteLine("");
+                        //Engine still running same direction
+                        time = DateTime.Now; // Update timer
+                    }
+
                 }
-                else if (!Console.KeyAvailable && ms > 500 && engines)
+                else if (ms > 300)
                 {
                     //No keypress detected, turn of engines
-                    engines = false;
-                    Stop();
+                    if(engines)
+                    {
+                        engines = false;
+                        Stop();
+                    }
+                    //else { Console.WriteLine("engines still turned off"); }
                 }
             }
         }
 
-
         public void MoveForward()
         {
             //Stop engines to avoid damage, then start moving forward
-            Stop();
+            //Stop();
             Console.WriteLine("Moving FORWARD, " + EngineA1 + " " + EngineB1);
             gpio.High(EngineA1);
             gpio.High(EngineB1);
@@ -298,7 +216,7 @@ namespace PetBot
         public void MoveReverse()
         {
             //Stop engines to avoid damage, then start moving reverse
-            Stop();
+            //Stop();
             Console.WriteLine("Moving REVERSE, " + EngineA2 + " " + EngineB2);
             gpio.High(EngineA2);
             gpio.High(EngineB2);
@@ -307,8 +225,8 @@ namespace PetBot
         public void MoveLeft()
         {
             //Stop engines to avoid damage, then start moving left
-            Stop();
-            Console.WriteLine("Left LEFT, " + EngineA1 + " " + EngineB1);
+            //Stop();
+            Console.WriteLine("Left LEFT, " + EngineA2 + " " + EngineB1);
             gpio.High(EngineA2);
             gpio.High(EngineB1);
 
@@ -317,8 +235,8 @@ namespace PetBot
         public void MoveRight()
         {
             //Stop engines to avoid damage, then start moving right
-            Stop();
-            Console.WriteLine("Left RIGHT, " + EngineA1 + " " + EngineB1);
+            //Stop();
+            Console.WriteLine("Left RIGHT, " + EngineA1 + " " + EngineB2);
             gpio.High(EngineA1);
             gpio.High(EngineB2);
 
@@ -331,6 +249,7 @@ namespace PetBot
             gpio.Low(EngineA2);
             gpio.Low(EngineB1);
             gpio.Low(EngineB2);
+            //Thread.Sleep(100); //Cooldown
 
         }
     }

@@ -4,7 +4,7 @@ namespace PetBot
 {
     class Program
     {
-        private static GpioSwitch gpio = new GpioSwitch();
+        private static GpioCore gpio = new GpioCore();
         private static Engine engine = new Engine();
 
         static void Main(string[] args)
