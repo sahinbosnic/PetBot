@@ -87,7 +87,7 @@ namespace PetBot
 
         public void ScanOpenPins()
         {
-            //Dont use yet, not functional
+            //Dont use yet, not functional due to random pin layout
             Console.WriteLine("Scanning for open pins...");
             for(int i = 1; i <= 40; i++)
             {

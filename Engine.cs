@@ -157,8 +157,7 @@ namespace PetBot
                     {
                         Console.WriteLine(ms + " NEW MS");
                         Stop(); // Stop engines before changing direction
-                        state = cki; //Set new state
-                        time = DateTime.Now; // Update timer
+                        state = cki; //Set new state    
                         Console.WriteLine("NEW direction: " + cki.Key.ToString());
                         switch (cki.Key.ToString())
                         {
@@ -179,10 +178,10 @@ namespace PetBot
                                 driving = false; // Quit driving mode
                                 break;
                         }
+                        time = DateTime.Now; // Update timer
                         Console.WriteLine("");
                     }
-
-                    if(cki.Key.ToString() == state.Key.ToString())
+                    else if(cki.Key.ToString() == state.Key.ToString())
                     {
                         Console.WriteLine("");
                         //Engine still running same direction
@@ -198,15 +197,12 @@ namespace PetBot
                         engines = false;
                         Stop();
                     }
-                    //else { Console.WriteLine("engines still turned off"); }
                 }
             }
         }
 
         public void MoveForward()
         {
-            //Stop engines to avoid damage, then start moving forward
-            //Stop();
             Console.WriteLine("Moving FORWARD, " + EngineA1 + " " + EngineB1);
             gpio.High(EngineA1);
             gpio.High(EngineB1);
@@ -215,8 +211,6 @@ namespace PetBot
 
         public void MoveReverse()
         {
-            //Stop engines to avoid damage, then start moving reverse
-            //Stop();
             Console.WriteLine("Moving REVERSE, " + EngineA2 + " " + EngineB2);
             gpio.High(EngineA2);
             gpio.High(EngineB2);
@@ -224,8 +218,6 @@ namespace PetBot
 
         public void MoveLeft()
         {
-            //Stop engines to avoid damage, then start moving left
-            //Stop();
             Console.WriteLine("Left LEFT, " + EngineA2 + " " + EngineB1);
             gpio.High(EngineA2);
             gpio.High(EngineB1);
@@ -234,8 +226,6 @@ namespace PetBot
 
         public void MoveRight()
         {
-            //Stop engines to avoid damage, then start moving right
-            //Stop();
             Console.WriteLine("Left RIGHT, " + EngineA1 + " " + EngineB2);
             gpio.High(EngineA1);
             gpio.High(EngineB2);
