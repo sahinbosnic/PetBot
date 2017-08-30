@@ -239,7 +239,6 @@ namespace PetBot
             gpio.Low(EngineA2);
             gpio.Low(EngineB1);
             gpio.Low(EngineB2);
-            //Thread.Sleep(100); //Cooldown
 
         }
     }

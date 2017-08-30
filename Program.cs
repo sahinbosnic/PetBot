@@ -18,8 +18,8 @@ namespace PetBot
                     Console.WriteLine("What would you like to do?");
                     Console.WriteLine("1. Drive PetBot");
                     Console.WriteLine("2. Activate AI");
-                    Console.WriteLine("3. Engine Config");
-                    Console.WriteLine("4. Handle GPIO pins");
+                    Console.WriteLine("3. PetBot Config");
+                    Console.WriteLine("4. Read/Write data");
                     int val = int.Parse(Console.ReadLine());
                     switch (val)
                     {
@@ -31,15 +31,15 @@ namespace PetBot
                             break;
 
                         case 3:
-                            //Engine Config
-                            EngineMenu();
+                            //Petbot Config
+                            ConfigMenu();
                             break;
 
                         case 4:
-                            //Handle GPIO pins
-                            GpioMenu();
+                            //test read/write data to database
+                            Database db = new Database();
+                            db.ReadData();
                             break;
-
                         default:
                             break;
                     }
@@ -49,6 +49,34 @@ namespace PetBot
                     //Post info to database and light up RED led!
                     //Severety "SERIOUS"
                     Console.WriteLine(ex.ToString());
+                }
+            }
+        }
+
+        static void ConfigMenu()
+        {
+            bool menu = true;
+            while (menu)
+            {
+                Console.WriteLine("PetBot Config Menu");
+                Console.WriteLine("1. Engine");
+                Console.WriteLine("2. Obstacle sensors");
+                Console.WriteLine("3. GPIO");
+                Console.WriteLine("4. Back");
+                int val = int.Parse(Console.ReadLine());
+                switch (val)
+                {
+                    case 1:
+                        EngineMenu();
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        GpioMenu();
+                        break;
+                    default:
+                        menu = false;
+                        break;
                 }
             }
         }
