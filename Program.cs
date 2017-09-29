@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace PetBot
 {
@@ -9,6 +10,9 @@ namespace PetBot
 
         static void Main(string[] args)
         {
+            //SQLite dependency for linux-arm
+            SQLitePCL.Batteries_V2.Init();
+            
             bool active = true;
             while (active)
             {
@@ -19,7 +23,7 @@ namespace PetBot
                     Console.WriteLine("1. Drive PetBot");
                     Console.WriteLine("2. Activate AI");
                     Console.WriteLine("3. PetBot Config");
-                    Console.WriteLine("4. Read/Write data");
+                    Console.WriteLine("4. Listen pin 23");
                     int val = int.Parse(Console.ReadLine());
                     switch (val)
                     {
@@ -34,11 +38,19 @@ namespace PetBot
                             //Petbot Config
                             ConfigMenu();
                             break;
-
                         case 4:
-                            //test read/write data to database
-                            Database db = new Database();
-                            db.ReadData();
+                            bool loop = true;
+                            GpioCore.Open(23);
+                            GpioCore.In(23);
+                            while(loop)
+                            {
+                                if(GpioCore.Read(23))
+                                {
+                                    Console.WriteLine("true");
+                                }
+                                else { Console.WriteLine("false"); }
+                                Thread.Sleep(200);
+                            }
                             break;
                         default:
                             break;
@@ -130,44 +142,59 @@ namespace PetBot
                 Console.WriteLine("4. Direction Out");
                 Console.WriteLine("5. Value HIGH");
                 Console.WriteLine("6. Value LOW");
-                Console.WriteLine("7. Scan open pins");
-                Console.WriteLine("8. Back");
+                Console.WriteLine("DONT. Listen on pin");
+                Console.WriteLine("8. Scan open pins");
+                Console.WriteLine("9. Back");
                 int val = int.Parse(Console.ReadLine());
                 switch (val)
                 {
                     case 1:
                         Console.WriteLine("Which pin would you like to open?");
                         int open = int.Parse(Console.ReadLine());
-                        gpio.Open(open);
+                        GpioCore.Open(open);
                         break;
 
                     case 2:
                         Console.WriteLine("Which pin would you like to close?");
                         int close = int.Parse(Console.ReadLine());
-                        gpio.Close(close);
+                        GpioCore.Close(close);
                         break;
                     case 3:
                         Console.WriteLine("Which pin would you like to set direction as 'IN'?");
                         int pinIn = int.Parse(Console.ReadLine());
-                        gpio.In(pinIn);
+                        GpioCore.In(pinIn);
                         break;
                     case 4:
                         Console.WriteLine("Which pin would you like to set direction as 'Out'?");
                         int pinOut = int.Parse(Console.ReadLine());
-                        gpio.Out(pinOut);
+                        GpioCore.Out(pinOut);
                         break;
                     case 5:
                         Console.WriteLine("Which pin would you like to set value as '1' (HIGH)?");
                         int high = int.Parse(Console.ReadLine());
-                        gpio.High(high);
+                        GpioCore.High(high);
                         break;
                     case 6:
                         Console.WriteLine("Which pin would you like to set value as '0' (LOW)?");
                         int low = int.Parse(Console.ReadLine());
-                        gpio.Low(low);
+                        GpioCore.Low(low);
                         break;
                     case 7:
-                        gpio.ScanOpenPins();
+                        /*Console.WriteLine("Which pin would you like to listen on?");
+                        int listen = int.Parse(Console.ReadLine());
+                        bool loop = true;
+                        int result = 0;
+                        while(loop)
+                        {
+                            result =  GpioCore.Listen(listen);
+                            if(result != 0)
+                            {
+                               loop = false;
+                            }
+                        }*/
+                        break;
+                    case 8:
+                        GpioCore.ScanOpenPins();
                         break;
                     default:
                         menu = false;

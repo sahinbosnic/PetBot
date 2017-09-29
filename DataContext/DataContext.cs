@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PetBot
 {
-    class PetBotContext : DbContext
+    class DataContext : DbContext
     {
         public DbSet<Errors> Errors { get; set; }
         public DbSet<Settings> Settings { get; set; }

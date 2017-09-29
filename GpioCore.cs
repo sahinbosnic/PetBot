@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace PetBot
 {
-    class GpioCore
+    public class GpioCore
     {
-        public void Open(int pinid)
+        public static void Open(int pinid)
         {
             if (!Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
@@ -20,7 +21,7 @@ namespace PetBot
             }
         }
 
-        public void Close(int pinid)
+        public static void Close(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
@@ -33,7 +34,7 @@ namespace PetBot
             }
         }
 
-        public void High(int pinid)
+        public static void High(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
@@ -45,7 +46,7 @@ namespace PetBot
                 Console.WriteLine("Error.. cant change value, " + pinid + " is closed");
             }
         }
-        public void Low(int pinid)
+        public static void Low(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
@@ -58,7 +59,7 @@ namespace PetBot
             }
         }
 
-        public void In(int pinid)
+        public static void In(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
@@ -71,7 +72,7 @@ namespace PetBot
             }
         }
 
-        public void Out(int pinid)
+        public static void Out(int pinid)
         {
             if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
             {
@@ -85,7 +86,20 @@ namespace PetBot
  
         }
 
-        public void ScanOpenPins()
+        public static bool Read(int pinid)
+        { 
+            //Works as long as there is a signal to the pin (1)
+            //When the signal is gone, the value drops to 0 = trigger
+            if (Directory.Exists("/sys/class/gpio/gpio" + pinid))
+            {
+                string value = File.ReadAllText("/sys/class/gpio/gpio" + pinid.ToString() + "/value");
+
+                if(value.Contains("0")) { return true;}
+            }
+            return false;
+        }
+
+        public static void ScanOpenPins()
         {
             //Dont use yet, not functional due to random pin layout
             Console.WriteLine("Scanning for open pins...");

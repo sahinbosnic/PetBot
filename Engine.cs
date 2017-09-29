@@ -8,132 +8,123 @@ namespace PetBot
 {
     class Engine
     {
-        private GpioCore gpio = new GpioCore();
+        //private GpioCore gpio = new GpioCore();
         private int EngineA1;
         private int EngineA2;
         private int EngineB1;
         private int EngineB2;
+        
+        private Sensors sensor {get; set;}
 
         public Engine()
         {
-            ReadConfig(); //Initialize by getting data from config file
-            ActivateEngines(); //Activate engines
+            Console.WriteLine("Connecting to database...");
+            ReadConfig(); //Initialize by getting data from database
+            sensor = new Sensors();
         }
 
         public void ReadConfig()
         {
-            if (File.Exists("Engine.config"))
+            DataController db = new DataController();
+            try
             {
-                //Read from config file
-                string[] lines = File.ReadAllLines("Engine.config");
-                foreach (var line in lines)
-                {
-                    string[] newLine = line.Split(":");
-                    if (newLine[0].Equals("Engine A 1") && newLine[1].Length > 0)
-                    {
-                        EngineA1 = int.Parse(newLine[1]);
-                        Console.WriteLine("EngineA1 set as: " + EngineA1);
-                    }
-                    else if (newLine[0].Equals("Engine A 2") && newLine[1].Length > 0)
-                    {
-                        EngineA2 = int.Parse(newLine[1]);
-                        Console.WriteLine("EngineA2 set as: " + EngineA2);
-                    }
-                    else if (newLine[0].Equals("Engine B 1") && newLine[1].Length > 0)
-                    {
-                        EngineB1 = int.Parse(newLine[1]);
-                        Console.WriteLine("EngineB1 set as: " + EngineB1);
-                    }
-                    else if (newLine[0].Equals("Engine B 2") && newLine[1].Length > 0)
-                    {
-                        EngineB2 = int.Parse(newLine[1]);
-                        Console.WriteLine("EngineB2 set as: " + EngineB2);
-                    }
-                    else
-                    {
-                        Console.WriteLine(string.Format("{0} has not been set, please edit the file and reload the config", newLine[0]));
-                    }
-                }
-
-                Console.WriteLine("Data has been loaded from Engine.config");
+                EngineA1 = int.Parse(db.GetSetting("EngineA1"));
+                EngineA2 = int.Parse(db.GetSetting("EngineA2"));
+                EngineB1 = int.Parse(db.GetSetting("EngineB1"));
+                EngineB2 = int.Parse(db.GetSetting("EngineB2"));
+                ViewConfig();
             }
-            else
+            catch
             {
-                //Create config file
-                string config =
-                    "Engine A 1: \n" +
-                    "Engine A 2: \n" +
-                    "Engine B 1: \n" +
-                    "Engine B 2: ";
-
-                File.WriteAllText("Engine.config", config);
-                Console.WriteLine("Config file 'Engine.config' was created, please edit it!");
+                Console.WriteLine("Config not found, atempting to insert..");
+                db.AddSetting("EngineA1", "0");
+                db.AddSetting("EngineA2", "0");
+                db.AddSetting("EngineB1", "0");
+                db.AddSetting("EngineB2", "0");
+                Console.WriteLine("Engine config created!");
+                Console.WriteLine("Please edit engine config before attempting to start the engines");
+                
+                EditConfig();
             }
         }
 
         public void EditConfig()
         {
-            if (File.Exists("Engine.config"))
-            {
-                //Read from config file
-                string[] lines = File.ReadAllLines("Engine.config");
-                string newConfig = "";
+            DataController db = new DataController();
 
-                foreach (var line in lines)
-                {
-                    string[] newLine;
-                    newLine = line.Split(":");
-                    Console.WriteLine("Would you like to edit (Y/N)");
-                    Console.WriteLine(newLine[0] + " With the value: " + newLine[1] + "");
-                    string choice = Console.ReadLine();
-                    if (choice == "y" || choice == "Y")
-                    {
-                        Console.WriteLine("Enter new value:");
-                        string newVal = Console.ReadLine();
-                        newConfig += string.Format("{0}: {1}", newLine[0], newVal);
-                    }
-                    else
-                    {
-                        newConfig += string.Format("{0}: {1}", newLine[0], newLine[1]);
-                    }
-                    newConfig += "\n";
-                }
-                File.WriteAllText("Engine.config", newConfig);
-
-            }
-            else
+            Console.WriteLine("Would you like to edit (Y/N): EngineA1 - {0}", db.GetSetting("EngineA1"));
+            if(Console.ReadLine() == "y" || Console.ReadLine() == "Y")
             {
-                Console.WriteLine("Engine.config not found, atempt to create new file...");
-                ReadConfig();
+                Console.WriteLine("Enter new value for EngineA1");
+                string newVal = Console.ReadLine();
+                db.UpdateSetting("EngineA1", newVal);
             }
+
+            Console.WriteLine("Would you like to edit (Y/N): EngineA2 - {0}", db.GetSetting("EngineA2"));
+            if(Console.ReadLine() == "y" || Console.ReadLine() == "Y")
+            {
+                Console.WriteLine("Enter new value for EngineA2");
+                string newVal = Console.ReadLine();
+                db.UpdateSetting("EngineA2", newVal);
+            }
+
+            Console.WriteLine("Would you like to edit (Y/N): EngineB1 - {0}", db.GetSetting("EngineB1"));
+            if(Console.ReadLine() == "y" || Console.ReadLine() == "Y")
+            {
+                Console.WriteLine("Enter new value for EngineB1");
+                string newVal = Console.ReadLine();
+                db.UpdateSetting("EngineB1", newVal);
+            }
+
+            Console.WriteLine("Would you like to edit (Y/N): EngineB2 - {0}", db.GetSetting("EngineB2"));
+            if(Console.ReadLine() == "y" || Console.ReadLine() == "Y")
+            {
+                Console.WriteLine("Enter new value for EngineB2");
+                string newVal = Console.ReadLine();
+                db.UpdateSetting("EngineB2", newVal);
+            }
+
+            ReadConfig();
         }
 
         public void ViewConfig()
         {
-            Console.WriteLine(File.ReadAllText("Engine.config"));
+            DataController db = new DataController();
+
+            Console.WriteLine("Getting engine config..");
+            Console.WriteLine("EngineA1: " + db.GetSetting("EngineA1"));
+            Console.WriteLine("EngineA2: " + db.GetSetting("EngineA2"));
+            Console.WriteLine("EngineB1: " + db.GetSetting("EngineB1"));
+            Console.WriteLine("EngineB2: " + db.GetSetting("EngineB2"));
         }
 
         public void ActivateEngines()
         {
             //Open engine pins
-            gpio.Open(EngineA1);
-            gpio.Open(EngineA2);
-            gpio.Open(EngineB1);
-            gpio.Open(EngineB2);
+        
+            GpioCore.Open(EngineA1);
+            GpioCore.Open(EngineA2);
+            GpioCore.Open(EngineB1);
+            GpioCore.Open(EngineB2);
 
             //Set engine pin direction as 'out'
-            gpio.Out(EngineA1);
-            gpio.Out(EngineA2);
-            gpio.Out(EngineB1);
-            gpio.Out(EngineB2);
+            GpioCore.Out(EngineA1);
+            GpioCore.Out(EngineA2);
+            GpioCore.Out(EngineB1);
+            GpioCore.Out(EngineB2);
 
             Console.WriteLine("Engines activated");
         }
 
         public void Controller()
         {
+            Console.WriteLine("");
+            ActivateEngines(); //Activate engines
+            sensor.ActivateSensors(); //Activate sensors
+
             bool driving = true;
             bool engines = false; // ON/OFF
+            bool ObstacleFront = false;
             ConsoleKeyInfo cki; //Gets user input
             ConsoleKeyInfo state; //Saves state to avoid spamming
 
@@ -141,6 +132,19 @@ namespace PetBot
             Console.WriteLine("Use 'W A S D' keys to run the bot, any other key will terminate it");
             while (driving)
             {
+                if(sensor.ScanFrontLeft() /*|| sensor.ScanFrontRight()*/)
+                {
+                    //An obstacle ahead, stop from continuing forward
+                    ObstacleFront = true;
+                    if(state.Key.ToString() == "W" && engines)
+                    {
+                        //Stop engines to avoid collision
+                        Console.WriteLine("Stoping engines, obstacle detected!");
+                        engines = false;
+                        Stop();
+                    }
+                } else { ObstacleFront = false;}
+                
                 TimeSpan span = DateTime.Now - time;
                 int ms = (int)span.TotalMilliseconds; //Get ms since last command
 
@@ -150,19 +154,23 @@ namespace PetBot
                     cki = Console.ReadKey(true);
                     Console.WriteLine(ms + "ms");
 
-                    Console.WriteLine("STATE: " + state.Key);
-                    Console.WriteLine("CKI: " + cki.Key);
+                    //Console.WriteLine("STATE: " + state.Key);
+                    //Console.WriteLine("CKI: " + cki.Key);
 
                     if (ms >= 300 || cki.Key.ToString() != state.Key.ToString())
                     {
-                        Console.WriteLine(ms + " NEW MS");
+                        //Console.WriteLine(ms + " NEW MS");
                         Stop(); // Stop engines before changing direction
+                        Thread.Sleep(100);
                         state = cki; //Set new state    
                         Console.WriteLine("NEW direction: " + cki.Key.ToString());
                         switch (cki.Key.ToString())
                         {
                             case "W":
-                                MoveForward();
+                                if(!ObstacleFront)
+                                {
+                                    MoveForward();
+                                }
                                 break;
                             case "A":
                                 MoveLeft();
@@ -194,6 +202,7 @@ namespace PetBot
                     //No keypress detected, turn of engines
                     if(engines)
                     {
+                        state = new ConsoleKeyInfo();
                         engines = false;
                         Stop();
                     }
@@ -204,41 +213,41 @@ namespace PetBot
         public void MoveForward()
         {
             Console.WriteLine("Moving FORWARD, " + EngineA1 + " " + EngineB1);
-            gpio.High(EngineA1);
-            gpio.High(EngineB1);
+            GpioCore.High(EngineA1);
+            GpioCore.High(EngineB1);
 
         }
 
         public void MoveReverse()
         {
             Console.WriteLine("Moving REVERSE, " + EngineA2 + " " + EngineB2);
-            gpio.High(EngineA2);
-            gpio.High(EngineB2);
+            GpioCore.High(EngineA2);
+            GpioCore.High(EngineB2);
         }
 
         public void MoveLeft()
         {
             Console.WriteLine("Left LEFT, " + EngineA2 + " " + EngineB1);
-            gpio.High(EngineA2);
-            gpio.High(EngineB1);
+            GpioCore.High(EngineA2);
+            GpioCore.High(EngineB1);
 
         }
 
         public void MoveRight()
         {
             Console.WriteLine("Left RIGHT, " + EngineA1 + " " + EngineB2);
-            gpio.High(EngineA1);
-            gpio.High(EngineB2);
+            GpioCore.High(EngineA1);
+            GpioCore.High(EngineB2);
 
         }
 
         public void Stop()
         {
             Console.WriteLine("Stopping Engines");
-            gpio.Low(EngineA1);
-            gpio.Low(EngineA2);
-            gpio.Low(EngineB1);
-            gpio.Low(EngineB2);
+            GpioCore.Low(EngineA1);
+            GpioCore.Low(EngineA2);
+            GpioCore.Low(EngineB1);
+            GpioCore.Low(EngineB2);
 
         }
     }
